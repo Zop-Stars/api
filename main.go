@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/http"
+	"os"
 	"strings"
 
 	"gofr.dev/pkg/gofr"
@@ -24,12 +25,17 @@ func main() {
 
 	creds := app.Config.Get("SVC_ACC_CREDS")
 
+	systemInstructions, err := os.ReadFile("service_instruction.txt")
+	if err != nil {
+		app.Logger().Errorf("failed to read system instructions: %v", err)
+	}
+
 	vertexAIConfigs := &vertex_ai.Configs{
 		ProjectID:         app.Config.Get("SVC_ACC_PROJECT_ID"),
 		LocationID:        app.Config.Get("SVC_ACC_LOCATION_ID"),
 		APIEndpoint:       app.Config.Get("SVC_ACC_ENDPOINT"),
 		Datastore:         strings.Split(app.Config.Get("SVC_ACC_DATASTORE"), ","),
-		SystemInstruction: []string{app.Config.Get("SVC_ACC_SYSTEM_INSTRUCTION")},
+		SystemInstruction: []string{string(systemInstructions)},
 		ModelID:           app.Config.Get("SVC_ACC_MODEL_ID"),
 		Credentials:       creds,
 	}
